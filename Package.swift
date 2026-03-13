@@ -6,14 +6,16 @@ import PackageDescription
 let package = Package(
     name: "SwiftDSA",
 	products: [
-		.library(name: "DSATopics", targets: ["DSATopics"])
+		.library(name: "DSATopics", targets: ["DSATopics"]),
+		.library(name: "DSAProblems", targets: ["DSAProblems"])
 	],
     targets: [
         .executableTarget(
             name: "SwiftDSA",
 			dependencies: ["DSATopics"]
         ),
-		.target(name: "DSATopics")
+		.target(name: "DSATopics"),
+		.target(name: "DSAProblems")
     ]
 )
 
