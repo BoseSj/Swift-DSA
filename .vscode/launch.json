@@ -1,0 +1,24 @@
+{
+    "configurations": [
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:swiftDSA}",
+            "name": "Debug swiftDSA",
+            "target": "swiftDSA",
+            "configuration": "debug",
+            "preLaunchTask": "swift: Build Debug swiftDSA"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:swiftDSA}",
+            "name": "Release swiftDSA",
+            "target": "swiftDSA",
+            "configuration": "release",
+            "preLaunchTask": "swift: Build Release swiftDSA"
+        }
+    ]
+}
