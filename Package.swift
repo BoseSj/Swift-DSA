@@ -12,10 +12,9 @@ let package = Package(
     targets: [
         .executableTarget(
             name: "SwiftDSA",
-			dependencies: ["DSATopics"]
+			dependencies: ["DSATopics", "DSAProblems"]
         ),
 		.target(name: "DSATopics"),
 		.target(name: "DSAProblems")
     ]
 )
-

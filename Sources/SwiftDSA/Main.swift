@@ -2,10 +2,10 @@
 // https://docs.swift.org/swift-book
 
 import DSATopics
-
+import DSAProblems
 
 extension String {
-	var reverseItem: String? {
+	private var reverseItem: String? {
 		switch self {
 			case "(": ")"
 			case "{": "}"
@@ -13,35 +13,97 @@ extension String {
 			default: nil
 		}
 	}
+	func isBracketCompleted(with item: String) -> Bool {
+		self.reverseItem == item
+	}
 }
 
-func isValidParentheses(_ s: String) -> Bool {
-	guard !s.isEmpty else { return true }
-	guard s.count%2 == 0 else {
+//		// ["()", "()[]{}", "(]", "([)]", "([])", "[({])}", "[({(())}[()]]"]
+//		["[({(())}[()])]"]
+//		//		["([])"]
+/// 1. Break input in array of items
+/// 2. For eachItem in array
+/// 	1. While distance from item < length of array
+/// 		1. Check item at 2n+1+index
+/// 			1. If Match
+/// 				1. Omit both items
+/// 				2. continue with next
+/// 		2. If never matches quit, return nil
+func isValidParenthesis(input: String) -> Bool {
+	guard input.count%2 == 0 else { return false }
+	
+	var newArray = input.map { String($0) }
+	
+	outerLoop: for index in 0..<newArray.count {
+		let item = newArray[index]
+		if newArray.allSatisfy({ $0.isEmpty }) {
+			break
+		}
+		if item.isEmpty {
+			continue outerLoop
+		}
+		
+		var n = 0
+		innerLoop: while newArray.count > (index + 2*n + 1) {
+			let distance = index + 2*n + 1
+			n += 1
+
+			if item.isBracketCompleted(with: newArray[distance]) {
+				newArray[distance] = ""
+				newArray[index] = ""
+				print(distance)
+				print(index)
+				print(newArray)
+				if distance > 1 {
+					if isValidParenthesis(input: newArray[index...distance].joined(separator: "")) {
+						for i in index...distance {
+							newArray[i] = ""
+							print(newArray)
+						}
+						continue outerLoop
+					}
+					else {
+						return false
+					}
+				}
+				else {
+					continue outerLoop
+				}
+			}
+		}
+		print(newArray)
 		return false
 	}
 	
-	var reduced = s
-	let firstItem = String(reduced.first!)
-	guard let reverseItem = firstItem.reverseItem else {
-		return false
-	}
-	reduced.removeFirst()
-	if let index = reduced.firstIndex(where: { item in
-		String(item) == reverseItem
-	}) {
-		reduced.remove(at: index)
-		return isValidParentheses(reduced)
-	}
-	else {
-		return false
-	}
+	return true
 }
 
+func findMaxConsecutiveOnes(_ nums: [Int]) -> Int {
+	var result = nums.first == 1 ? 1 : 0
+	var buffer = 0
+	
+	for index in 1..<nums.count {
+		let item = nums[index]
+		let prevItem = nums[index-1]
+		
+		if item == 1 || (item == 1 && item == prevItem) {
+			result += 1
+		}
+		else {
+			if buffer < result {
+				buffer = result
+			}
+			result = 0
+		}
+	}
+	
+	return max(buffer, result)
+}
 
 @main
 struct swiftDSA {
-    static func main() {
+	static func main() {
 		
-    }
+		print(findMaxConsecutiveOnes(input))
+	}
 }

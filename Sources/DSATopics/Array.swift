@@ -7,7 +7,6 @@
 
 import Foundation
 
-
 public struct CustomArray<Model: Equatable> {
 	public let value: Model
 	
