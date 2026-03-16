@@ -78,10 +78,57 @@ func isValidParenthesis(input: String) -> Bool {
 	return true
 }
 
+func findWordsContaining(_ words: [String], _ x: Character) -> [Int] {
+	var result: [Int] = []
+	
+	for index in 0..<words.count {
+		let currentItem = words[index]
+		if currentItem.contains(x) {
+			result.append(index)
+		}
+	}
+	
+	return result
+}
+
 @main
 struct SwiftDSA {
 	static func main() {
-		
-		
+		// Test cases for findWordsContaining
+		// Each test is (words, x, expectedIndices)
+		let tests: [([String], Character, [Int])] = [
+			// Basic cases
+			(["apple", "banana", "cherry"], "a", [0, 1]),
+			(["dog", "cat", "mouse"], "z", []),
+			(["x", "xx", "axx", "b"], "x", [0, 1, 2]),
+			// Character appears in multiple positions
+			(["alpha", "beta", "gamma", "delta"], "a", [0, 2, 3]),
+			// Mixed case sensitivity (Swift's contains is case-sensitive)
+			(["Hello", "world", "HELLO"], "H", [0]),
+			(["Hello", "world", "HELLO"], "h", []),
+			// Empty strings
+			(["", "a", "", "b"], "a", [1]),
+			// Repeated words
+			(["test", "testing", "attest", "contest"], "t", [0, 1, 2, 3]),
+			// Non-ASCII characters
+			(["café", "naïve", "résumé"], "é", [0, 2])
+		]
+
+		var passed = 0
+		var failed = 0
+
+		for (i, test) in tests.enumerated() {
+			let (words, x, expected) = test
+			let got = findWordsContaining(words, x)
+			// Because order may be any, compare sorted results
+			let ok = got.sorted() == expected.sorted()
+			if ok { passed += 1 } else { failed += 1 }
+			print("Test #\(i + 1): \(ok ? "PASSED" : "FAILED")")
+			print("  words=\(words), x=\(x)")
+			print("  expected indices (any order)=\(expected)")
+			print("  got                  (any order)=\(got)\n")
+		}
+
+		print("Summary: \(passed) passed, \(failed) failed out of \(tests.count) tests.")
 	}
 }
