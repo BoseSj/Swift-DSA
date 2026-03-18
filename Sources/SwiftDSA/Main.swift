@@ -91,44 +91,88 @@ func findWordsContaining(_ words: [String], _ x: Character) -> [Int] {
 	return result
 }
 
+
+func largestOddNumber(_ num: String) -> String {
+	var result = num
+	
+	while !result.isEmpty {
+		
+		let lastnum =  Int(String(result.last!))!
+		if lastnum%2 != 0 { break }
+		_ = result.popLast()
+	}
+	
+	return result
+}
+
+func evalRPN(_ tokens: [String]) -> Int {
+	func calculate(x: Int, y: Int, operation: String) -> Int {
+		switch operation {
+			case "+": x+y
+			case "-": x-y
+			case "*": x*y
+			case "/": x/y
+			default: x
+		}
+	}
+	var evalutationArray: [Int] = []
+	for index in 0..<tokens.count {
+		let currentItem = tokens[index]
+		if let digit = Int(currentItem) {
+			evalutationArray.append(digit)
+		}
+		else {
+			if evalutationArray.count >= 2 {
+				let lastDigit = evalutationArray.popLast()!
+				let secondLastDigit = evalutationArray.popLast()!
+				evalutationArray.append(calculate(x: lastDigit, y: secondLastDigit,
+												  operation: currentItem))
+			}
+		}
+		
+	}
+	
+	return evalutationArray.first ?? 0
+}
+
+
 @main
 struct SwiftDSA {
 	static func main() {
-		// Test cases for findWordsContaining
-		// Each test is (words, x, expectedIndices)
-		let tests: [([String], Character, [Int])] = [
-			// Basic cases
-			(["apple", "banana", "cherry"], "a", [0, 1]),
-			(["dog", "cat", "mouse"], "z", []),
-			(["x", "xx", "axx", "b"], "x", [0, 1, 2]),
-			// Character appears in multiple positions
-			(["alpha", "beta", "gamma", "delta"], "a", [0, 2, 3]),
-			// Mixed case sensitivity (Swift's contains is case-sensitive)
-			(["Hello", "world", "HELLO"], "H", [0]),
-			(["Hello", "world", "HELLO"], "h", []),
-			// Empty strings
-			(["", "a", "", "b"], "a", [1]),
-			// Repeated words
-			(["test", "testing", "attest", "contest"], "t", [0, 1, 2, 3]),
-			// Non-ASCII characters
-			(["café", "naïve", "résumé"], "é", [0, 2])
+		// Inline tests for evalRPN(_:) — prints pass/fail per case and a summary
+		let rpnTests: [([String], Int)] = [
+			// Single number
+			(["3"], 3),
+			(["-42"], -42),
+			// Basic operations
+			(["2", "1", "+"], 3),
+			(["5", "3", "-"], 2),
+			(["4", "6", "*"], 24),
+			(["8", "2", "/"], 4),
+			// Truncation toward zero in division
+			(["-7", "2", "/"], -3),      // -7/2 -> -3
+			(["7", "-2", "/"], -3),      // 7/-2 -> -3
+			(["-7", "-2", "/"], 3),      // -7/-2 -> 3
+			(["-3", "-2", "/"], 1),      // -3/-2 -> 1
+			// Composite expressions
+			(["2", "1", "+", "3", "*"], 9), // (2+1)*3
+			(["4", "13", "5", "/", "+"], 6), // 4 + (13/5) -> 4 + 2
+			(["10", "6", "9", "3", "+", "-11", "*", "/", "*", "17", "+", "5", "+"], 22),
+			(["5", "1", "2", "+", "4", "*", "+", "3", "-"], 14) // 5 + (1+2)*4 - 3
 		]
 
 		var passed = 0
 		var failed = 0
-
-		for (i, test) in tests.enumerated() {
-			let (words, x, expected) = test
-			let got = findWordsContaining(words, x)
-			// Because order may be any, compare sorted results
-			let ok = got.sorted() == expected.sorted()
+		for (i, test) in rpnTests.enumerated() {
+			let (tokens, expected) = test
+			let got = evalRPN(tokens)
+			let ok = got == expected
 			if ok { passed += 1 } else { failed += 1 }
-			print("Test #\(i + 1): \(ok ? "PASSED" : "FAILED")")
-			print("  words=\(words), x=\(x)")
-			print("  expected indices (any order)=\(expected)")
-			print("  got                  (any order)=\(got)\n")
+			print("RPN Test #\(i + 1): \(ok ? "PASSED" : "FAILED")")
+			print("  tokens  = \(tokens)")
+			print("  expected= \(expected)")
+			print("  got     = \(got)\n")
 		}
-
-		print("Summary: \(passed) passed, \(failed) failed out of \(tests.count) tests.")
+		print("RPN Summary: \(passed) passed, \(failed) failed out of \(rpnTests.count) tests.")
 	}
 }
