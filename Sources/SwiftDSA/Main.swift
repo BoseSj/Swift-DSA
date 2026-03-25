@@ -104,123 +104,136 @@ func largestOddNumber(_ num: String) -> String {
 	
 	return result
 }
-
-
-/// ["0:start:0","1:start:2","1:end:5","0:end:6"]
-
-func exclusiveTime(_ n: Int, _ logs: [String]) -> [Int] {
-	var timeLog: [[Int]] = Array(repeating: [], count: n)
+func exclusiveTime2(_ n: Int, _ logs: [String]) -> [Int] {
+	var runTimeLog: [Int] = Array(repeating: -1,
+								  count: Int(logs[logs.count-1].split(separator: ":")[2])!+1)
+	
+	/// Push on Start, Pop on End
+	var callStack: [(id: Int, timeStamp: Int)] = []
 	for log in logs {
-		let functionID = Int(log.components(separatedBy: ":")[0])!
-		let time = Int(log.components(separatedBy: ":")[2])!
+		let funcID = Int(log.split(separator: ":")[0])!
+		let mode = log.split(separator: ":")[1]
+		let funcTimeStamp = Int(log.split(separator: ":")[2])!
 		
-		timeLog[functionID].append(time)
-	}
-	print("timeLog")
-	print(timeLog)
-	
-	var timeMap: [Int] = Array(repeating: -1, count: Int(logs[logs.count-1].split(separator: ":")[2])! + 1)
-	for operation in 0..<timeLog.count {
-		let time = timeLog[operation]
-		for timeIndex in time[0]...time[time.count-1] {
-			timeMap[timeIndex] = operation
+		if mode == "start" {
+			callStack.append((id: funcID, timeStamp: funcTimeStamp))
 		}
-	}
-	print("timeMap")
-	print(timeMap)
-	
-	var operationCount = Array(repeating: 0, count: n)
-	for index in 0..<timeMap.count {
-		if timeMap[index] >= 0 {
-			let operation = timeMap[index]
-			operationCount[operation] += 1
+		else {
+			if let lastFunc = callStack.popLast() {
+				for index in lastFunc.timeStamp...funcTimeStamp {
+					if runTimeLog[index] == -1 {
+						runTimeLog[index] = lastFunc.id
+					}
+				}
+			}
+			
 		}
 	}
 	
-	return operationCount
+	var result = Array(repeating: 0, count: n)
+	for log in runTimeLog {
+		if log >= 0 {
+			result[log] += 1
+		}
+	}
+	
+	return result
 }
 
-
-// MARK: - Tests for exclusiveTime
-@discardableResult
-func runExclusiveTimeTests() -> Bool {
-    typealias TestCase = (name: String, n: Int, logs: [String], expected: [Int])
-
-    let cases: [TestCase] = [
-        (
-            "Example 1 (nested)",
-            2,
-            ["0:start:0","1:start:2","1:end:5","0:end:6"],
-            [3,4]
-        ),
-        (
-            "Sequential non-overlapping",
-            3,
-            ["0:start:0","0:end:0","1:start:1","1:end:1","2:start:2","2:end:2"],
-            [1,1,1]
-        ),
-        (
-            "Immediate start/end same timestamp",
-            1,
-            ["0:start:7","0:end:7"],
-            [1]
-        ),
-        (
-            "Single function multiple segments",
-            1,
-            ["0:start:0","0:end:1","0:start:3","0:end:3","0:start:5","0:end:7"],
-            [5]
-        ),
-        (
-            "Nested depth 2",
-            1,
-            ["0:start:0","0:start:1","0:end:2","0:end:3"],
-            [4]
-        ),
-        (
-            "Interleaved siblings",
-            2,
-            ["0:start:0","0:end:0","1:start:1","1:end:2"],
-            [1,2]
-        ),
-        (
-            "Longer nested with sibling",
-            2,
-            ["0:start:0","0:start:2","0:end:5","1:start:6","1:end:6","0:end:7"],
-            [5,1]
-        ),
-        (
-            "Multiple calls of same function id",
-            2,
-            ["0:start:0","0:end:0","0:start:1","0:end:1","1:start:2","1:end:4"],
-            [2,3]
-        )
-    ]
-
-    var allPassed = true
-    for tc in cases {
-        let got = exclusiveTime(tc.n, tc.logs)
-        let pass = got == tc.expected
-        if pass {
-            print("✅ \(tc.name): PASSED")
-        } else {
-            print("❌ \(tc.name): FAILED — expected \(tc.expected), got \(got)")
-        }
-        allPassed = allPassed && pass
-    }
-
-    return allPassed
+func optimisedExclusiveTime(_ n: Int, _ logs: [String]) -> [Int] {	
+	/// Push on Start, Pop on End
+	var callStack: [(id: Int, timeStamp: Int)] = []
+	var result = Array(repeating: 0, count: n)
+	for log in logs {
+		let funcID = Int(log.split(separator: ":")[0])!
+		let mode = log.split(separator: ":")[1]
+		let funcTimeStamp = Int(log.split(separator: ":")[2])!
+		
+		if mode == "start" {
+			callStack.append((id: funcID, timeStamp: funcTimeStamp))
+		}
+		else {
+			if let lastFunc = callStack.popLast() {
+				let lapsedTime = funcTimeStamp - lastFunc.timeStamp + 1
+				result[lastFunc.id] += lapsedTime
+				
+				if !callStack.isEmpty {
+					callStack[callStack.count-1].timeStamp += lapsedTime
+				}
+			}
+		}
+	}
+	
+	return result
 }
 
 @main
 struct SwiftDSA {
 	static func main() {
-        let ok = runExclusiveTimeTests()
-        if ok {
-            print("✅ All exclusiveTime test cases PASSED")
-        } else {
-            print("❌ Some exclusiveTime test cases FAILED")
-        }
+		print(
+			optimisedExclusiveTime(
+				2,
+				["0:start:0","0:start:2","0:end:5","1:start:6","1:end:6","0:end:7"]
+			)
+		)
+		
+		print(
+			optimisedExclusiveTime(
+				1,
+				["0:start:0","0:end:1","0:start:3","0:end:3","0:start:5","0:end:7"]
+			)
+		)
+		
+		print(
+			optimisedExclusiveTime(
+				2,
+				["0:start:0","1:start:2","1:end:5","0:end:6"]
+			)
+		)
+//		
+		print(
+			optimisedExclusiveTime(
+				8,
+				[
+					"0:start:0",
+					"1:start:5",
+					"2:start:6",
+					"3:start:9",
+					"4:start:11",
+					"5:start:12",
+					"6:start:14",
+					"7:start:15",
+					"1:start:24",
+					"1:end:29",
+					"7:end:34",
+					"6:end:37",
+					"5:end:39",
+					"4:end:40",
+					"3:end:45",
+					"0:start:49",
+					"0:end:54",
+					"5:start:55",
+					"5:end:59",
+					"4:start:63",
+					"4:end:66",
+					"2:start:69",
+					"2:end:70",
+					"2:start:74",
+					"6:start:78",
+					"0:start:79",
+					"0:end:80",
+					"6:end:85",
+					"1:start:89",
+					"1:end:93",
+					"2:end:96",
+					"2:end:100",
+					"1:end:102",
+					"2:start:105",
+					"2:end:109",
+					"0:end:114"
+				]
+			)
+		)
 	}
 }
 
