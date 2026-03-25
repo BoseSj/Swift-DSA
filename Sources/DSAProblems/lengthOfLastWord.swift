@@ -7,12 +7,11 @@
 
 import Foundation
 
-func lengthOfLastWord(_ s: String) -> Int {
-	s.components(separatedBy: " ")
-		.map {
-			$0.trimmingCharacters(in: .whitespacesAndNewlines)
-		}
-		.filter { !$0.isEmpty }
-		.last?
-		.count ?? 0
+public enum StringProblems {
+	public static func lengthOfLastWord(_ s: String) -> Int {
+		s.trimmingCharacters(in: .whitespaces)
+			.split(separator: " ")
+			.last?
+			.count ?? 0
+	}
 }

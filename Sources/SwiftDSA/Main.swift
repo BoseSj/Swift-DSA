@@ -105,74 +105,122 @@ func largestOddNumber(_ num: String) -> String {
 	return result
 }
 
-func evalRPN(_ tokens: [String]) -> Int {
-	func calculate(x: Int, y: Int, operation: String) -> Int {
-		switch operation {
-			case "+": x+y
-			case "-": x-y
-			case "*": x*y
-			case "/": x/y
-			default: x
+
+/// ["0:start:0","1:start:2","1:end:5","0:end:6"]
+
+func exclusiveTime(_ n: Int, _ logs: [String]) -> [Int] {
+	var timeLog: [[Int]] = Array(repeating: [], count: n)
+	for log in logs {
+		let functionID = Int(log.components(separatedBy: ":")[0])!
+		let time = Int(log.components(separatedBy: ":")[2])!
+		
+		timeLog[functionID].append(time)
+	}
+	print("timeLog")
+	print(timeLog)
+	
+	var timeMap: [Int] = Array(repeating: -1, count: Int(logs[logs.count-1].split(separator: ":")[2])! + 1)
+	for operation in 0..<timeLog.count {
+		let time = timeLog[operation]
+		for timeIndex in time[0]...time[time.count-1] {
+			timeMap[timeIndex] = operation
 		}
 	}
-	var evalutationArray: [Int] = []
-	for index in 0..<tokens.count {
-		let currentItem = tokens[index]
-		if let digit = Int(currentItem) {
-			evalutationArray.append(digit)
+	print("timeMap")
+	print(timeMap)
+	
+	var operationCount = Array(repeating: 0, count: n)
+	for index in 0..<timeMap.count {
+		if timeMap[index] >= 0 {
+			let operation = timeMap[index]
+			operationCount[operation] += 1
 		}
-		else {
-			if evalutationArray.count >= 2 {
-				let lastDigit = evalutationArray.popLast()!
-				let secondLastDigit = evalutationArray.popLast()!
-				evalutationArray.append(calculate(x: lastDigit, y: secondLastDigit,
-												  operation: currentItem))
-			}
-		}
-		
 	}
 	
-	return evalutationArray.first ?? 0
+	return operationCount
 }
 
+
+// MARK: - Tests for exclusiveTime
+@discardableResult
+func runExclusiveTimeTests() -> Bool {
+    typealias TestCase = (name: String, n: Int, logs: [String], expected: [Int])
+
+    let cases: [TestCase] = [
+        (
+            "Example 1 (nested)",
+            2,
+            ["0:start:0","1:start:2","1:end:5","0:end:6"],
+            [3,4]
+        ),
+        (
+            "Sequential non-overlapping",
+            3,
+            ["0:start:0","0:end:0","1:start:1","1:end:1","2:start:2","2:end:2"],
+            [1,1,1]
+        ),
+        (
+            "Immediate start/end same timestamp",
+            1,
+            ["0:start:7","0:end:7"],
+            [1]
+        ),
+        (
+            "Single function multiple segments",
+            1,
+            ["0:start:0","0:end:1","0:start:3","0:end:3","0:start:5","0:end:7"],
+            [5]
+        ),
+        (
+            "Nested depth 2",
+            1,
+            ["0:start:0","0:start:1","0:end:2","0:end:3"],
+            [4]
+        ),
+        (
+            "Interleaved siblings",
+            2,
+            ["0:start:0","0:end:0","1:start:1","1:end:2"],
+            [1,2]
+        ),
+        (
+            "Longer nested with sibling",
+            2,
+            ["0:start:0","0:start:2","0:end:5","1:start:6","1:end:6","0:end:7"],
+            [5,1]
+        ),
+        (
+            "Multiple calls of same function id",
+            2,
+            ["0:start:0","0:end:0","0:start:1","0:end:1","1:start:2","1:end:4"],
+            [2,3]
+        )
+    ]
+
+    var allPassed = true
+    for tc in cases {
+        let got = exclusiveTime(tc.n, tc.logs)
+        let pass = got == tc.expected
+        if pass {
+            print("✅ \(tc.name): PASSED")
+        } else {
+            print("❌ \(tc.name): FAILED — expected \(tc.expected), got \(got)")
+        }
+        allPassed = allPassed && pass
+    }
+
+    return allPassed
+}
 
 @main
 struct SwiftDSA {
 	static func main() {
-		// Inline tests for evalRPN(_:) — prints pass/fail per case and a summary
-		let rpnTests: [([String], Int)] = [
-			// Single number
-			(["3"], 3),
-			(["-42"], -42),
-			// Basic operations
-			(["2", "1", "+"], 3),
-			(["5", "3", "-"], 2),
-			(["4", "6", "*"], 24),
-			(["8", "2", "/"], 4),
-			// Truncation toward zero in division
-			(["-7", "2", "/"], -3),      // -7/2 -> -3
-			(["7", "-2", "/"], -3),      // 7/-2 -> -3
-			(["-7", "-2", "/"], 3),      // -7/-2 -> 3
-			(["-3", "-2", "/"], 1),      // -3/-2 -> 1
-			// Composite expressions
-			(["2", "1", "+", "3", "*"], 9), // (2+1)*3
-			(["4", "13", "5", "/", "+"], 6), // 4 + (13/5) -> 4 + 2
-			(["10", "6", "9", "3", "+", "-11", "*", "/", "*", "17", "+", "5", "+"], 22),
-			(["5", "1", "2", "+", "4", "*", "+", "3", "-"], 14) // 5 + (1+2)*4 - 3
-		]
-
-		var passed = 0
-		var failed = 0
-		for (i, test) in rpnTests.enumerated() {
-			let (tokens, expected) = test
-			let got = evalRPN(tokens)
-			let ok = got == expected
-			if ok { passed += 1 } else { failed += 1 }
-			print("RPN Test #\(i + 1): \(ok ? "PASSED" : "FAILED")")
-			print("  tokens  = \(tokens)")
-			print("  expected= \(expected)")
-			print("  got     = \(got)\n")
-		}
-		print("RPN Summary: \(passed) passed, \(failed) failed out of \(rpnTests.count) tests.")
+        let ok = runExclusiveTimeTests()
+        if ok {
+            print("✅ All exclusiveTime test cases PASSED")
+        } else {
+            print("❌ Some exclusiveTime test cases FAILED")
+        }
 	}
 }
+

@@ -5,7 +5,7 @@
 //  Created by Cepheus on 15/03/26.
 //
 
-
+import Foundation
 
 func findErrorNums(_ nums: [Int]) -> [Int] {
 	var counter = Array(repeating: 0, count: nums.count)
