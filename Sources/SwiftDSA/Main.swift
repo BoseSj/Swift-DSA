@@ -140,10 +140,11 @@ func exclusiveTime2(_ n: Int, _ logs: [String]) -> [Int] {
 	return result
 }
 
-func optimisedExclusiveTime(_ n: Int, _ logs: [String]) -> [Int] {	
+func optimisedExclusiveTime(_ n: Int, _ logs: [String]) -> [Int] {
 	/// Push on Start, Pop on End
 	var callStack: [(id: Int, timeStamp: Int)] = []
 	var result = Array(repeating: 0, count: n)
+	var previousLapsedTime = 0
 	for log in logs {
 		let funcID = Int(log.split(separator: ":")[0])!
 		let mode = log.split(separator: ":")[1]
@@ -157,9 +158,24 @@ func optimisedExclusiveTime(_ n: Int, _ logs: [String]) -> [Int] {
 				let lapsedTime = funcTimeStamp - lastFunc.timeStamp + 1
 				result[lastFunc.id] += lapsedTime
 				
+				print("lastFunc")
+				print(lastFunc)
+				print("lapsedTime")
+				print(lapsedTime)
+				print("!callStack.isEmpty")
+				print(!callStack.isEmpty)
+				
 				if !callStack.isEmpty {
-					callStack[callStack.count-1].timeStamp += lapsedTime
+					print("last stack item")
+					print(callStack[callStack.count-1])
+					callStack[callStack.count-1].timeStamp += lapsedTime/* + previousLapsedTime*/
+//					previousLapsedTime += lapsedTime
+					print("updated stack item")
+					print(callStack[callStack.count-1])
 				}
+//				else {
+//					previousLapsedTime = 0
+//				}
 			}
 		}
 	}
@@ -172,27 +188,6 @@ struct SwiftDSA {
 	static func main() {
 		print(
 			optimisedExclusiveTime(
-				2,
-				["0:start:0","0:start:2","0:end:5","1:start:6","1:end:6","0:end:7"]
-			)
-		)
-		
-		print(
-			optimisedExclusiveTime(
-				1,
-				["0:start:0","0:end:1","0:start:3","0:end:3","0:start:5","0:end:7"]
-			)
-		)
-		
-		print(
-			optimisedExclusiveTime(
-				2,
-				["0:start:0","1:start:2","1:end:5","0:end:6"]
-			)
-		)
-//		
-		print(
-			optimisedExclusiveTime(
 				8,
 				[
 					"0:start:0",
@@ -202,10 +197,10 @@ struct SwiftDSA {
 					"4:start:11",
 					"5:start:12",
 					"6:start:14",
-					"7:start:15",
-					"1:start:24",
-					"1:end:29",
-					"7:end:34",
+//					"7:start:15",
+//					"1:start:24",
+//					"1:end:29",
+//					"7:end:34",
 					"6:end:37",
 					"5:end:39",
 					"4:end:40",
