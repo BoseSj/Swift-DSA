@@ -91,7 +91,6 @@ func findWordsContaining(_ words: [String], _ x: Character) -> [Int] {
 	return result
 }
 
-
 func largestOddNumber(_ num: String) -> String {
 	var result = num
 	
@@ -106,10 +105,69 @@ func largestOddNumber(_ num: String) -> String {
 }
 
 
+/// Look at the current element at i
+/// Store it in the result array, now we need a min j which is j > i, element[j] <= element[i]
+/// so we will need a status for the price
+/// let's create a tuple array (priceOfi, priceDiscounted)
+/// when discounted price will be from false to true
+/// but how to decide the discounting element for the said current element
+/// like this we will go through all the elements
+/// then return all the first elements of the tuple
+
+func finalPrices(_ prices: [Int]) -> [Int] {
+	var result = prices
+	var priceLog: [(price: Int, index: Int)] = []
+	
+	outerLoop: for index in 0..<prices.count {
+		let currentPrice = prices[index]
+		
+		innerLoop: while !priceLog.isEmpty {
+			let lastElement = priceLog[priceLog.count-1]
+			if lastElement.price >= currentPrice {
+				result[lastElement.index] -= currentPrice
+				_ = priceLog.popLast()
+			} else { break innerLoop }
+		}
+		
+		priceLog.append((price: currentPrice, index: index))
+	}
+	return result
+}
+
+func dailyTemperatures(_ temperatures: [Int]) -> [Int] {
+	var result = Array(repeating: 0, count: temperatures.count)
+	var temperatureLog: [(temp: Int, index: Int)] = []
+	
+	outerLoop: for index in 0..<temperatures.count {
+		let currentTemperature = temperatures[index]
+		
+		innerLoop: while !temperatureLog.isEmpty {
+			let lastTemperature = temperatureLog[temperatureLog.count-1]
+			
+			if lastTemperature.temp < currentTemperature {
+				result[lastTemperature.index] = index - lastTemperature.index
+				_ = temperatureLog.popLast()
+			} else { break innerLoop }
+		}
+		
+		temperatureLog.append((temp: currentTemperature, index: index))
+	}
+	
+	return result
+}
+
 
 @main
 struct SwiftDSA {
 	static func main() {
+		[
+			[73,74,75,71,69,72,76,73],
+			[30,40,50,60],
+			[30,60,90]
+		].forEach { temperatures in
+			print("dailyTemperatures(\(temperatures))")
+			print(dailyTemperatures(temperatures))
+		}
 	}
 }
 

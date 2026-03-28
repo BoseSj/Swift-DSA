@@ -9,6 +9,9 @@ let package = Package(
 		.library(name: "DSATopics", targets: ["DSATopics"]),
 		.library(name: "DSAProblems", targets: ["DSAProblems"])
 	],
+	dependencies: [
+		.package(url: "https://github.com/apple/swift-docc-plugin", from: "1.0.0"),
+	],
     targets: [
         .executableTarget(
             name: "SwiftDSA",
