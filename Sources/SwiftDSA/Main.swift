@@ -4,170 +4,92 @@
 import DSATopics
 import DSAProblems
 
-extension String {
-	private var reverseItem: String? {
-		switch self {
-			case "(": ")"
-			case "{": "}"
-			case "[": "]"
-			default: nil
-		}
-	}
-	func isBracketCompleted(with item: String) -> Bool {
-		self.reverseItem == item
-	}
+
+func calculateRectHeight(heights: [Int]) -> Int {
+	(heights.min() ?? 0) * heights.count
 }
 
-//		// ["()", "()[]{}", "(]", "([)]", "([])", "[({])}", "[({(())}[()]]"]
-//		["[({(())}[()])]"]
-//		//		["([])"]
-/// 1. Break input in array of items
-/// 2. For eachItem in array
-/// 	1. While distance from item < length of array
-/// 		1. Check item at 2n+1+index
-/// 			1. If Match
-/// 				1. Omit both items
-/// 				2. continue with next
-/// 		2. If never matches quit, return nil
-func isValidParenthesis(input: String) -> Bool {
-	guard input.count%2 == 0 else { return false }
-	
-	var newArray = input.map { String($0) }
-	
-	outerLoop: for index in 0..<newArray.count {
-		let item = newArray[index]
-		if newArray.allSatisfy({ $0.isEmpty }) {
-			break
-		}
-		if item.isEmpty {
-			continue outerLoop
-		}
-		
-		var n = 0
-		innerLoop: while newArray.count > (index + 2*n + 1) {
-			let distance = index + 2*n + 1
-			n += 1
-
-			if item.isBracketCompleted(with: newArray[distance]) {
-				newArray[distance] = ""
-				newArray[index] = ""
-				print(distance)
-				print(index)
-				print(newArray)
-				if distance > 1 {
-					if isValidParenthesis(input: newArray[index...distance].joined(separator: "")) {
-						for i in index...distance {
-							newArray[i] = ""
-							print(newArray)
-						}
-						continue outerLoop
+func largestRectangleArea(_ heights: [Int]) -> Int {
+	var maxHeight = calculateRectHeight(heights: heights)
+	var heightStack = [Int]()
+	for height in heights {
+		if !heightStack.isEmpty {
+			let currentHeight = calculateRectHeight(heights: heightStack)
+			let comingHeight = calculateRectHeight(heights: heightStack + [height])
+			let immediateHeight = calculateRectHeight(heights: [heightStack.last!, height])
+			let nextHeight = calculateRectHeight(heights: [height])
+			let currentMaxHeight = max(currentHeight, comingHeight, immediateHeight)
+			maxHeight = max(currentMaxHeight, maxHeight)
+			
+			print("currentHeight \(currentHeight) comingHeight \(comingHeight) immediateHeight \(immediateHeight) nextHeight \(nextHeight) currentMaxHeight \(currentMaxHeight)")
+			switch currentMaxHeight {
+				case nextHeight, currentHeight:
+					print("Current height is max: \(heightStack) -> \(currentMaxHeight)")
+					heightStack.removeAll()
+					heightStack.append(height)
+				case comingHeight:
+					if comingHeight == immediateHeight {
+						let last = heightStack.last!
+						heightStack.removeAll()
+						heightStack.append(last)
 					}
-					else {
-						return false
-					}
-				}
-				else {
-					continue outerLoop
-				}
+					heightStack.append(height)
+					print("Coming height ll be max: \(heightStack) -> \(currentMaxHeight)")
+				case immediateHeight:
+					_ = heightStack.removeFirst()
+					heightStack.append(height)
+					print("Immediate height ll be max: \(heightStack) -> \(currentMaxHeight)")
+				default:
+					print("Nothing")
 			}
 		}
-		print(newArray)
-		return false
-	}
-	
-	return true
-}
-
-func findWordsContaining(_ words: [String], _ x: Character) -> [Int] {
-	var result: [Int] = []
-	
-	for index in 0..<words.count {
-		let currentItem = words[index]
-		if currentItem.contains(x) {
-			result.append(index)
+		else {
+			heightStack.append(height)
+			maxHeight = max(maxHeight, calculateRectHeight(heights: heightStack))
+			print("Immediate height might be max: \(heightStack) -> \(calculateRectHeight(heights: heightStack))")
 		}
 	}
 	
-	return result
-}
-
-func largestOddNumber(_ num: String) -> String {
-	var result = num
-	
-	while !result.isEmpty {
-		
-		let lastnum =  Int(String(result.last!))!
-		if lastnum%2 != 0 { break }
-		_ = result.popLast()
-	}
-	
-	return result
+	return maxHeight
 }
 
 
-/// Look at the current element at i
-/// Store it in the result array, now we need a min j which is j > i, element[j] <= element[i]
-/// so we will need a status for the price
-/// let's create a tuple array (priceOfi, priceDiscounted)
-/// when discounted price will be from false to true
-/// but how to decide the discounting element for the said current element
-/// like this we will go through all the elements
-/// then return all the first elements of the tuple
-
-func finalPrices(_ prices: [Int]) -> [Int] {
-	var result = prices
-	var priceLog: [(price: Int, index: Int)] = []
-	
-	outerLoop: for index in 0..<prices.count {
-		let currentPrice = prices[index]
-		
-		innerLoop: while !priceLog.isEmpty {
-			let lastElement = priceLog[priceLog.count-1]
-			if lastElement.price >= currentPrice {
-				result[lastElement.index] -= currentPrice
-				_ = priceLog.popLast()
-			} else { break innerLoop }
-		}
-		
-		priceLog.append((price: currentPrice, index: index))
-	}
-	return result
-}
-
-func dailyTemperatures(_ temperatures: [Int]) -> [Int] {
-	var result = Array(repeating: 0, count: temperatures.count)
-	var temperatureLog: [(temp: Int, index: Int)] = []
-	
-	outerLoop: for index in 0..<temperatures.count {
-		let currentTemperature = temperatures[index]
-		
-		innerLoop: while !temperatureLog.isEmpty {
-			let lastTemperature = temperatureLog[temperatureLog.count-1]
+	@main
+	struct SwiftDSA {
+		static func main() {
+			let testCases: [(heights: [Int], expected: Int)] = [
+//				([1, 2, 4, 5, 1, 4], 8),
+//				([2, 1, 5, 6, 2, 3], 10),
+//				([2, 4], 4),
+//				([2, 1, 2], 3),
+//				([1], 1),
+//				([1, 1], 2),
+//				([1, 1, 1, 1], 4),
+//				([4, 2, 0, 3, 2, 5], 6),
+//				([6, 2, 5, 4, 5, 1, 6], 12),
+//				([2, 3, 4, 5, 6], 12),
+				([0,1,2,3,4,5,6,7,8], 20),
+//				([6, 5, 4, 3, 2], 12),
+//				([0, 0, 0], 0),
+//				([2, 0, 2], 2),
+//				([5, 5, 1, 7, 1, 1, 5, 2, 7, 6], 12)
+			]
 			
-			if lastTemperature.temp < currentTemperature {
-				result[lastTemperature.index] = index - lastTemperature.index
-				_ = temperatureLog.popLast()
-			} else { break innerLoop }
-		}
-		
-		temperatureLog.append((temp: currentTemperature, index: index))
-	}
-	
-	return result
-}
-
-
-@main
-struct SwiftDSA {
-	static func main() {
-		[
-			[73,74,75,71,69,72,76,73],
-			[30,40,50,60],
-			[30,60,90]
-		].forEach { temperatures in
-			print("dailyTemperatures(\(temperatures))")
-			print(dailyTemperatures(temperatures))
+			var isAllPass = true
+			testCases.forEach { testCase in
+				let actual = largestRectangleArea(testCase.heights)
+				let status = actual == testCase.expected ? "PASS" : "FAIL"
+				if actual != testCase.expected {
+					isAllPass = false
+				}
+				print("largestRectangleArea(\(testCase.heights))")
+				print("expected: \(testCase.expected), actual: \(actual) -> \(status)")
+			}
+			
+			if isAllPass {
+				print("✅ All Passed")
+			} else {
+				print("❌ Some Failed")
+			}
 		}
 	}
-}
-
