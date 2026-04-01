@@ -53,43 +53,65 @@ func largestRectangleArea(_ heights: [Int]) -> Int {
 	return maxHeight
 }
 
+func isPalindrome(_ s: String) -> Bool {
+	let cleaned = s.replacing(/[^A-Za-z0-9]/, with: "")
+	
+	var counter = 1
+	for index in cleaned.indices {
+		let currentNum = cleaned[index].lowercased()
+		let currentMirrorNum = cleaned[cleaned.index(cleaned.endIndex, offsetBy: -(counter))].lowercased()
+		if currentNum != currentMirrorNum { return false }
+		counter += 1
+	}
+	
+	return true
+}
 
-	@main
-	struct SwiftDSA {
-		static func main() {
-			let testCases: [(heights: [Int], expected: Int)] = [
-//				([1, 2, 4, 5, 1, 4], 8),
-//				([2, 1, 5, 6, 2, 3], 10),
-//				([2, 4], 4),
-//				([2, 1, 2], 3),
-//				([1], 1),
-//				([1, 1], 2),
-//				([1, 1, 1, 1], 4),
-//				([4, 2, 0, 3, 2, 5], 6),
-//				([6, 2, 5, 4, 5, 1, 6], 12),
-//				([2, 3, 4, 5, 6], 12),
-				([0,1,2,3,4,5,6,7,8], 20),
-//				([6, 5, 4, 3, 2], 12),
-//				([0, 0, 0], 0),
-//				([2, 0, 2], 2),
-//				([5, 5, 1, 7, 1, 1, 5, 2, 7, 6], 12)
-			]
-			
-			var isAllPass = true
-			testCases.forEach { testCase in
-				let actual = largestRectangleArea(testCase.heights)
-				let status = actual == testCase.expected ? "PASS" : "FAIL"
-				if actual != testCase.expected {
-					isAllPass = false
-				}
-				print("largestRectangleArea(\(testCase.heights))")
-				print("expected: \(testCase.expected), actual: \(actual) -> \(status)")
-			}
-			
-			if isAllPass {
-				print("✅ All Passed")
-			} else {
-				print("❌ Some Failed")
-			}
+
+@main
+struct SwiftDSA {
+	static func main() {
+		[
+			"A man, a plan, a canal: Panama"
+		].forEach { item in
+			print(isPalindrome(item))
 		}
 	}
+//	static func main() {
+//		let testCases: [(heights: [Int], expected: Int)] = [
+//			//				([1, 2, 4, 5, 1, 4], 8),
+//			//				([2, 1, 5, 6, 2, 3], 10),
+//			//				([2, 4], 4),
+//			//				([2, 1, 2], 3),
+//			//				([1], 1),
+//			//				([1, 1], 2),
+//			//				([1, 1, 1, 1], 4),
+//			//				([4, 2, 0, 3, 2, 5], 6),
+//			//				([6, 2, 5, 4, 5, 1, 6], 12),
+//			//				([2, 3, 4, 5, 6], 12),
+//			([0,1,2,3,4,5,6,7,8], 20),
+//			//				([6, 5, 4, 3, 2], 12),
+//			//				([0, 0, 0], 0),
+//			//				([2, 0, 2], 2),
+//			//				([5, 5, 1, 7, 1, 1, 5, 2, 7, 6], 12)
+//		]
+//		
+//		var isAllPass = true
+//		testCases.forEach { testCase in
+//			let actual = largestRectangleArea(testCase.heights)
+//			let status = actual == testCase.expected ? "PASS" : "FAIL"
+//			if actual != testCase.expected {
+//				isAllPass = false
+//			}
+//			print("largestRectangleArea(\(testCase.heights))")
+//			print("expected: \(testCase.expected), actual: \(actual) -> \(status)")
+//		}
+//		
+//		if isAllPass {
+//			print("✅ All Passed")
+//		} else {
+//			print("❌ Some Failed")
+//		}
+//	}
+}
+

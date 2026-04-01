@@ -5,6 +5,7 @@ import PackageDescription
 
 let package = Package(
     name: "SwiftDSA",
+	platforms: [.macOS(.v14)],
 	products: [
 		.library(name: "DSATopics", targets: ["DSATopics"]),
 		.library(name: "DSAProblems", targets: ["DSAProblems"])
